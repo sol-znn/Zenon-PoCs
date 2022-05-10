@@ -1,4 +1,4 @@
-// message_signer.dat
+// message_signer.dart
 // Dart PoC to sign an arbitrary message with a Zenon private key
 // Output can be reversed to derive source address
 
