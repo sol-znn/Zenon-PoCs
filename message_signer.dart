@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:hex/hex.dart';
 import 'package:znn_sdk_dart/znn_sdk_dart.dart';
 
-var node = "ws://127.0.0.1:35998";
+var node = "wss://node.zenon.fun:35998";
 final Zenon znnClient = Zenon();
 
 var msg = "Test";
