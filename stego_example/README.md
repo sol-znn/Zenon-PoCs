@@ -4,5 +4,5 @@ Simple proof of concept that demonstrates the ability to append arbitrary data t
 
 Use a file-to-hex converter like https://hexed.it to compare the input vs output.  
 
-Example
+Example  
 ![Example](example.jpg)
