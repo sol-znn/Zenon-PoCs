@@ -1,0 +1,23 @@
+Zenon
+
+May 1
+·
+7 min read
+·
+The New NFT Standard: when cryptography meets steganography
+
+The hype of 2021 continues uninterrupted and is posed to disrupt many more industries as the technology matures. Companies and individuals alike are investing considerable amounts of money into NFT projects, and many startups are racing to capitalize on this opportunity.
+
+Non-fungible tokens allow anyone to hold ownership of unique digital items and keep track of the ownership via transactions stored on the blockchain.
+
+Through this article, we’ll share the new NFT standard and some of its use-cases, while providing some guidance and direction for ecosystem participants to contribute towards turning this pursuit quicker into reality.
+
+Pairing the current cryptography stack of the Network of Momentum with digital steganography will set the benchmark for the NFT industry: the Virtual Hologram — more on this later in the article.
+
+First of all, let’s start by defining the two concepts underlying the new NFT standard: cryptography and steganography. Both fields of study predate our modern society by at least 2,500 years.
+
+Cryptography is the practice and study of techniques that enable authentication, confidentiality, data integrity, and non-repudiation. Cryptography is at the core of our digital world, cryptocurrencies included.
+
+Steganography on the other hand is the practice and study of techniques that enable one to conceal a message within another message and communicate without the knowledge of any third parties.
+
+However, this lesser-known subject is starting to gain traction in the digital space and deserves a dedicated section to better understand how it evolved over time.

@@ -20,12 +20,12 @@ Future<void> append_stego_payload(File input) async {
   List<int> appendBytes = utf8.encode(foo);
 
   print('Saving .\\output\\output.${extension}');
-  await output.writeAsBytes(bytes, mode:FileMode.append);
+  await output.writeAsBytes(bytes, mode:FileMode.writeOnly);
   await output.writeAsBytes(appendBytes, mode:FileMode.append);
 }
 
 Future<void> main() async {
-  var list = ["png", "rar", "zip", "jpg", "mp4"];
+  var list = ["docx", "pdf", "rtf", "txt", "gif", "png", "rar", "zip", "jpg", "ogg", "mp3", "mp4"];
   for(var ext in list){
     await append_stego_payload(new File (".\\input\\input.${ext}"));
   }
