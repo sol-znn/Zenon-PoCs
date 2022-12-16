@@ -1,0 +1,11 @@
+name: stego_main
+description: LSB steganography POC
+version: 0.0.1
+
+environment:
+  sdk: '>=2.14.0 <3.0.0'
+
+dependencies:
+  #flutter: # Required for every Flutter project
+  #  sdk: flutter # Required for every Flutter project
+  image: ^3.2.2
