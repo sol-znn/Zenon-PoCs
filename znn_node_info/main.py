@@ -1,54 +1,133 @@
-# Script to identify node locations and service providers
+# Script to identify active node locations and service providers
 
 import requests
 import socket
 import threading
 import os
 import IP2Location
+import urllib3
 
-# todo
-# 1. Write a spider algo to branch out from starting_node
-#    and query locations for all other peered nodes in the network
-# 2. Support http and https queries
-# 3. Pipe data to google maps api
-# 4. Identify host providers, print list in order of occurrence
+checked = []    # ip added to this array if we've attempted to pull its stats.networkInfo
+responded = []  # ip added to this array if it responds with data for stats.networkInfo
+nodes = []      # all discovered ip's are added to this array, some may be stale/offline
+locations = []  # for each ip in responded[], query for its location and host provider details
 
-# Set this to an authentic node in the network
-starting_node = "https://node.zenon.fun:35997"
-
+# Get IP location for a live node
 def getHostInfo(ip):
     database = IP2Location.IP2Location(os.path.join("data", "IP2LOCATION-LITE-DB3.BIN"))
-
+    rec = database.get_all(ip)
     try:
         host = socket.gethostbyaddr(ip)
-        rec = database.get_all(ip)
-        country = rec.country_long
-        region = rec.region
-        city = rec.city
-        print(host, " || " + city + ", " + region + ", " + country)
+        host = host[0]
     except:
-        print(ip, "could not be reached")
+        host = "no-host-info"
+        pass
+
+    locations.append("{}: {} || {}, {}, {}".format(ip, host, rec.city, rec.region, rec.country_long))
+
+
+# Get network details for individual IPs
+def getPeers(ip):
+    global results
+    params = {"jsonrpc": "2.0", "id": 40, "method": "stats.networkInfo", "params": []}
+    header = {"content-type": "application/json"}
+    ip = ip.strip()
+    checked.append(ip)
+
+    try:
+        results = requests.get("http://" + ip + ":35997", headers=header, json=params, timeout=20)
+    except Exception as e:
+        # print(e)
+        pass
+
+    if "HTTPS" in results.content.__str__():
+        try:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            results = requests.get("https://" + ip + ":35997", headers=header, json=params, timeout=20, verify=False)
+        except:
+            pass
+
+    if results.status_code == 200:
+        responded.append(ip)
+        data = results.json()
+        print("{}: {}".format(ip, data))
+        peers = data['result']['peers']
+        for peer in peers:
+            nodes.append(peer['ip'])
+
+
+# Thread Handler
+def dispatcher(ipList, func):
+    global t
+    threads = []
+
+    for ip in ipList:
+        if func == "getPeers":
+            t = threading.Thread(target=getPeers, args=(ip,))
+        elif func == "getHostInfo":
+            t = threading.Thread(target=getHostInfo, args=(ip,))
+        threads.append(t)
+
+    for t in threads:
+        t.start()
+
+    for t in threads:
+        t.join()
+
+
+# De-duplicates a list of IPs
+def dedupeList(nodes):
+    _nodes = []
+    while len(nodes) > 0:
+        _n = nodes.pop(0)
+        discovered = False
+        for n in nodes:
+            if _n == n:
+                discovered = True
+                break
+        if not discovered:
+            _nodes.append(_n)
+    return _nodes
 
 
 if __name__ == '__main__':
-    p = {"jsonrpc": "2.0", "id": 40, "method": "stats.networkInfo", "params": []}
-    h = {"content-type": "application/json"}
-    x = requests.get(starting_node, headers=h, json=p)
+    # Start with seeders,txt
+    print("[!] Getting Seeder node data...", end=" ")
+    seeders = open('seeders.txt', 'r')
+    lines = seeders.readlines()
+    dispatcher(lines, "getPeers")
+    nodes = dedupeList(nodes)
+    print("Done!")
 
-    data = x.json()
-    peers = data['result']['peers']
+    # Spider to find all other nodes
+    print("[!] Getting remaining node data...", end=" ")
+    checkedAll = False
+    while not checkedAll:
+        _nodes = []  # nodes to be checked
+        for n in nodes:
+            alreadyChecked = False
+            for c in checked:
+                if c == n:
+                    alreadyChecked = True
+                    break
+            if not alreadyChecked:
+                _nodes.append(n)
+        if len(_nodes) == 0:
+            checkedAll = True
+        else:
+            dispatcher(_nodes, "getPeers")
+            nodes = dedupeList(nodes)
+            responded = dedupeList(responded)
+            checked = dedupeList(checked)
 
-    for peer in peers:
-        ip = peer['ip']
-        threads = []
-        try:
-            t = threading.Thread(target=getHostInfo, args=(ip,))
-            threads.append(t)
-        except:
-            print ("Error: unable to start thread")
+    print("Done!")
+    print("----------")
+    print("Checked ({}): {}".format(len(checked), checked))
+    print("Responded ({}): {}".format(len(responded), responded))
+    print("Nodes ({}): {}".format(len(nodes), nodes))
+    print("----------")
+    print("----------")
+    dispatcher(responded, "getHostInfo")
 
-        for t in threads:
-            t.start()
-
-        for t in threads:
-            t.join()
+    for n in locations:
+        print(n)
