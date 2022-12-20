@@ -11,6 +11,7 @@ checked = []    # ip added to this array if we've attempted to pull its stats.ne
 responded = []  # ip added to this array if it responds with data for stats.networkInfo
 nodes = []      # temp array of nodes
 locations = []  # for each ip in responded[], query for its location and host provider details
+providers = {}  # occurrence of domain names for each node's service provider
 
 
 # Get IP location for a live node
@@ -24,6 +25,15 @@ def getHostInfo(ip):
         host = "no-host-info"
         pass
 
+    try:
+        _p = host.split(".")[-2] + "." + host.split(".")[-1]
+    except:
+        _p = host
+
+    if (_p in providers.keys()):
+        providers[_p] += 1
+    else:
+        providers[_p] = 1
     locations.append("{}: {} || {}, {}, {}".format(ip, host, rec.city, rec.region, rec.country_long))
 
 
@@ -119,13 +129,16 @@ if __name__ == '__main__':
             nodes = dedupeList(nodes)
             responded = dedupeList(responded)
             checked = dedupeList(checked)
+    print("Done!")
 
+    print("[!] Getting node location data...", end=" ")
+    dispatcher(responded, "getHostInfo")
     print("Done!")
     print("----------")
     print("Checked ({}): {}".format(len(checked), checked))
     print("Responded ({}): {}".format(len(responded), responded))
+    print("Providers ({}): {}".format(len(providers), providers))
     print("----------")
-    dispatcher(responded, "getHostInfo")
 
     for n in locations:
         print(n)
