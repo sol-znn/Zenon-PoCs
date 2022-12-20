@@ -1,16 +1,17 @@
 # Script to identify active node locations and service providers
 
+import IP2Location
+import os
 import requests
 import socket
 import threading
-import os
-import IP2Location
 import urllib3
 
 checked = []    # ip added to this array if we've attempted to pull its stats.networkInfo
 responded = []  # ip added to this array if it responds with data for stats.networkInfo
-nodes = []      # all discovered ip's are added to this array, some may be stale/offline
+nodes = []      # temp array of nodes
 locations = []  # for each ip in responded[], query for its location and host provider details
+
 
 # Get IP location for a live node
 def getHostInfo(ip):
@@ -50,7 +51,6 @@ def getPeers(ip):
     if results.status_code == 200:
         responded.append(ip)
         data = results.json()
-        print("{}: {}".format(ip, data))
         peers = data['result']['peers']
         for peer in peers:
             nodes.append(peer['ip'])
@@ -124,8 +124,6 @@ if __name__ == '__main__':
     print("----------")
     print("Checked ({}): {}".format(len(checked), checked))
     print("Responded ({}): {}".format(len(responded), responded))
-    print("Nodes ({}): {}".format(len(nodes), nodes))
-    print("----------")
     print("----------")
     dispatcher(responded, "getHostInfo")
 
