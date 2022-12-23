@@ -1,11 +1,12 @@
 # Script to identify active node locations and service providers
 
+from cymruwhois import Client
 import IP2Location
+import json
 import os
 import requests
 import socket
 import threading
-from cymruwhois import Client
 
 verbose = False
 checked = []    # ip added to this array if we've attempted to pull its stats.networkInfo
@@ -13,7 +14,8 @@ responded = []  # ip added to this array if it responds with data for stats.netw
 nodes = []      # temp array of nodes
 locations = []  # for each ip in responded[], query for its location and host provider details
 providers = {}  # occurrence of domain names for each node's service provider
-
+output_nodes = os.path.join("data", "output_nodes.json")
+output_providers = os.path.join("data", "output_providers.json")
 
 # Get IP location for a live node
 def getHostInfo(ip):
@@ -37,7 +39,16 @@ def getHostInfo(ip):
         providers[_p] += 1
     else:
         providers[_p] = 1
-    locations.append("{}: {} || {}, {}, {}".format(ip, _p, rec.city, rec.region, rec.country_long))
+
+    _json = {
+        "ip": ip,
+        "provider": _p,
+        "city": rec.city,
+        "region": rec.region,
+        "country": rec.country_long
+    }
+    locations.append(_json)
+    #locations.append("{}: {} || {}, {}, {}".format(ip, _p, rec.city, rec.region, rec.country_long))
 
 
 # Get network details for individual IPs
@@ -159,11 +170,21 @@ if __name__ == '__main__':
     print("[!] Getting node location data...", end=" ")
     dispatcher(responded, "getHostInfo")
     print("Done!")
-    print("----------")
-    print("Checked ({}): {}".format(len(checked), checked))
-    print("Responded ({}): {}".format(len(responded), responded))
-    print("Providers ({}): {}".format(len(providers), providers))
-    print("----------")
 
-    for n in locations:
-        print(n)
+    print("[!] Saving data to files...", end=" ")
+    with open(output_providers, "w") as outfile:
+        json.dump(providers, outfile, indent=4)
+
+    with open(output_nodes, "w") as outfile:
+        json.dump(locations, outfile, indent=4)
+    print("Done!")
+
+    if verbose:
+        print("----------")
+        print("Checked ({}): {}".format(len(checked), checked))
+        print("Responded ({}): {}".format(len(responded), responded))
+        print("Providers ({}): {}".format(len(providers), providers))
+        print("----------")
+        for n in locations:
+            print(n)
+
