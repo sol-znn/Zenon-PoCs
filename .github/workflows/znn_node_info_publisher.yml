@@ -5,14 +5,11 @@ on:
     branches: [ "main" ]
   schedule:
     - cron:  '0 */6 * * *'    # Every 6 hours
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  build:
-
+  generate-znn-node-info:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.10
@@ -33,7 +30,7 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: znn_node_info/data/*.json
-        tag: ${{ github.ref }}
+        tag: znn_node_info
         file_glob: true
         overwrite: true
-        body: ""    
+        body: ""
