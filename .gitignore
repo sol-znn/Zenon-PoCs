@@ -1,2 +1,6 @@
 .idea/
-znn_node_info/env/
+znn_node_info/venv/
+znn_node_info/.idea/
+znn_correlator/.dart_tool/
+znn_correlator/.idea/
+znn_correlator/mints.txt

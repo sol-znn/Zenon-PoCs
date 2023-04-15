@@ -1,14 +1,16 @@
 // znn_correlator.dart
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'package:dcli/dcli.dart';
 import 'package:collection/collection.dart';
 import 'package:znn_sdk_dart/znn_sdk_dart.dart';
 
 var ws = 'wss://node.zenon.fun:35998';
-var startingMomentum = 1;
+var startingMomentum = 1; //3000000;
 var endingMomentum = null;
+Map mints = Map<String, double>();
 
 List extractMomentumData(DetailedMomentumList getDetailedMomentumsByHeight) {
   List messages = [];
@@ -49,10 +51,15 @@ List extractMomentumData(DetailedMomentumList getDetailedMomentumsByHeight) {
                 } else if (tokenStandard.toString() == qsrTokenStandard) {
                   token = 'QSR';
                 }
-                if (token == 'ZNN') {
+                if (token == 'ZNN' || token == 'QSR') {
+                  // && mechanism != 'swap') {
                   cprint(
                       '$receiveAddress minted ${amount} $token via $mechanism',
                       element.momentum.height);
+                  new File('mints.txt').writeAsStringSync(
+                      '[${element.momentum.height}] $receiveAddress minted ${amount} $token via $mechanism\n',
+                      mode: FileMode.append);
+                  //addMint(receiveAddress, amount);
                 }
               } else if (_isBurn(f)) {
                 print(red(
@@ -67,6 +74,14 @@ List extractMomentumData(DetailedMomentumList getDetailedMomentumsByHeight) {
     }
   });
   return messages;
+}
+
+void addMint(String address, double amount) {
+  if (mints.containsKey(address)) {
+    mints[address] = mints[address]! + amount;
+  } else {
+    mints[address] = amount;
+  }
 }
 
 AbiFunction _getAbiFunction(AccountBlock block) {
@@ -175,6 +190,7 @@ Future<int> main(List<String> args) async {
       currentHeight = height;
     }
 
+    //print(mints);
     print("[-] Sleeping 120 seconds...");
     await new Future.delayed(const Duration(seconds: 120));
   }
