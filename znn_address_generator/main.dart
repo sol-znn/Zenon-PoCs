@@ -5,12 +5,10 @@ import 'package:synchronized/synchronized.dart';
 import 'package:znn_sdk_dart/znn_sdk_dart.dart';
 
 int queueSize = 10;
-int jobs = 47;
+int jobs = 100;
 int addressesPerMnemonic = 5;
 
 final filename = 'results.txt';
-
-// regex: (.)\1{2}$
 
 generateAddresses(port) async {
   var store = await KeyStore.newRandom();
