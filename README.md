@@ -6,3 +6,4 @@
 - znn_decay_calculator
 - znn_correlator
 - znn_htlc_test
+- znn_address_generator
